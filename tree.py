@@ -27,10 +27,17 @@ def graph_from_levels(rows, level_col=2, root_id="__synthetic_root__"):
     return graph
 
 
-def graph_to_leafpaths(graph, root_id="__synthetic_root__", path_col=1):
+def graph_to_leafpaths(graph, root_id="__synthetic_root__", name_col=1):
     paths = []
+    max_path_len = 0
     for leaf_id in [node for node in graph.nodes if node != root_id and graph.out_degree(node) == 0]:
         path = nx.shortest_path(graph, root_id, leaf_id)[1:]
-        paths.append([graph.nodes[node]["raw"][path_col] for node in path])
+        path_names = [graph.nodes[node]["raw"][name_col] for node in path]
+        max_path_len = max(max_path_len, len(path_names))
+        paths.append([path_names, graph.nodes[leaf_id]["raw"]])
+
+    for index, path in enumerate(paths):
+        path_names, raw = path
+        paths[index] = path_names + [None] * (max_path_len - len(path_names)) + raw
 
     return paths
